@@ -15,7 +15,7 @@ def cargar_modelo():
     pkl = (
         "kmeans_riesgo_actuarial.pkl"
         if os.path.exists("kmeans_riesgo_actuarial.pkl")
-        else "kmeans_riesgo_actuarial(2).pkl"
+        else "kmeans_riesgo_actuarial.pkl"
     )
 
     meta = (
