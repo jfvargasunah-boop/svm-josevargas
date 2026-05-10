@@ -21,7 +21,7 @@ def cargar_modelo():
     meta = (
         "model_metadata.json"
         if os.path.exists("model_metadata.json")
-        else "model_metadata(2).json"
+        else "model_metadata.json"
     )
 
     modelo = joblib.load(pkl)
