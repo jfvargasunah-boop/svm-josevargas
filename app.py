@@ -19,7 +19,7 @@ def cargar_modelo():
     )
 
     meta = (
-        "model_metadata.json"
+        "kmeans_riesgo_actuarial.json"
         if os.path.exists("kmeans_riesgo_actuarial.json")
         else "kmeans_riesgo_actuarial.json"
     )
