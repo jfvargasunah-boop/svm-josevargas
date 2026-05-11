@@ -76,11 +76,19 @@ if enviar:
         }
     ])
 
-    cluster = int(modelo.predict(cliente)[0])
-    riesgo = mapa.get(cluster, "No definido")
+    cliente_encoded = cliente.copy()
+    
+    for col in metadata["variables_categoricas"]:
+        if col in cliente_encoded.columns:
+            unique_vals = sorted(df[col].unique())
+            encoding_map = {val: idx for idx, val in enumerate(unique_vals)}
+            cliente_encoded[col] = cliente_encoded[col].map(encoding_map)
+    
+    column_order = metadata["variables_numericas"] + metadata["variables_categoricas"]
+    cliente_encoded = cliente_encoded[column_order]
 
-    st.subheader(f"Riesgo actuarial: {riesgo}")
-    st.write(f"Cluster asignado: {cluster}")
+    cluster = int(modelo.predict(cliente_encoded)[0])
+    riesgo = mapa.get(cluster, "No definido")
 
     api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
 
