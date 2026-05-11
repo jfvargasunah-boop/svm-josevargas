@@ -34,7 +34,7 @@ def cargar_modelo():
 
 @st.cache_data
 def cargar_base():
-    csv = "insurance.csv" if os.path.exists("insurance.csv") else "insurance(2).csv"
+    csv = "insurance.csv" if os.path.exists("insurance.csv") else "insurance.csv"
     return pd.read_csv(csv)
 
 
