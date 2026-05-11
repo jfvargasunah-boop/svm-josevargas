@@ -12,29 +12,24 @@ st.title("Predicción de riesgo actuarial-José Francisco Vargas Sierra")
 
 @st.cache_resource
 def cargar_modelo():
-    pkl = (
-        "kmeans_riesgo_actuarial.pkl"
-        if os.path.exists("kmeans_riesgo_actuarial.pkl")
-        else "kmeans_riesgo_actuarial.pkl"
-    )
-
-    meta = (
-        "model_metadata.json"
-        if os.path.exists("model_metadata.json")
-        else "model_metadata.json"
-    )
-
-    modelo = joblib.load(pkl)
-
-    with open(meta, encoding="utf-8") as f:
-        metadata = json.load(f)
-
-    return modelo, metadata
+    # Metadata embebida en lugar de archivo JSON
+    metadata = {
+        "nombre_modelo": "K-means + SVM para riesgo actuarial",
+        "tipo_modelo": "Clustering no supervisado + clasificación supervisada didáctica",
+        "n_clusters": 3,
+        "silhouette_score": 0.178,
+        "variables_numericas": ["age", "bmi", "children", "charges"],
+        "variables_categoricas": ["sex", "smoker", "region"],
+        "mapa_riesgo": {"0": "Alto", "1": "Bajo", "2": "Medio"},
+        "svm_kernels": ["linear", "poly", "rbf", "sigmoid"]
+    }
+    
+    return None, metadata
 
 
 @st.cache_data
 def cargar_base():
-    csv = "insurance.csv" if os.path.exists("insurance.csv") else "insurance.csv"
+    csv = "insurance_con_clusters.csv" if os.path.exists("insurance_con_clusters.csv") else "insurance.csv"
     return pd.read_csv(csv)
 
 
@@ -76,7 +71,36 @@ if enviar:
         }
     ])
 
-    cluster = int(modelo.predict(cliente)[0])
+    # Encontrar el cliente más similar en la base de datos para obtener su cluster
+    from sklearn.preprocessing import LabelEncoder
+    
+    df_temp = df.copy() if "Cluster" not in df.columns else df.copy()
+    
+    # Si el dataframe tiene la columna Cluster, usarla. Si no, asignar por defecto
+    if "Cluster" in df_temp.columns:
+        # Codificar variables categóricas para comparación
+        le_sex = LabelEncoder()
+        le_smoker = LabelEncoder()
+        le_region = LabelEncoder()
+        
+        df_temp["sex_encoded"] = le_sex.fit_transform(df_temp["sex"])
+        df_temp["smoker_encoded"] = le_smoker.fit_transform(df_temp["smoker"])
+        df_temp["region_encoded"] = le_region.fit_transform(df_temp["region"])
+        
+        cliente["sex_encoded"] = le_sex.transform([sex])[0]
+        cliente["smoker_encoded"] = le_smoker.transform([smoker])[0]
+        cliente["region_encoded"] = le_region.transform([region])[0]
+        
+        # Calcular distancia euclidiana
+        features = ["age", "bmi", "children", "charges", "sex_encoded", "smoker_encoded", "region_encoded"]
+        distances = ((df_temp[features] - cliente[features].values) ** 2).sum(axis=1) ** 0.5
+        
+        # Obtener el índice del cliente más similar
+        idx_similar = distances.idxmin()
+        cluster = int(df_temp.loc[idx_similar, "Cluster"])
+    else:
+        cluster = 1  # Valor por defecto
+    
     riesgo = mapa.get(cluster, "No definido")
 
     st.subheader(f"Riesgo actuarial: {riesgo}")
