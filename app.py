@@ -13,9 +13,9 @@ st.title("Predicción de riesgo actuarial-José Francisco Vargas Sierra")
 @st.cache_resource
 def cargar_modelo():
     pkl = (
-        "svm_riesgo_actuarial.pkl"
-        if os.path.exists("svm_riesgo_actuarial.pkl")
-        else "svm_riesgo_actuarial.pkl"
+        "kmeans_riesgo_actuarial.pkl"
+        if os.path.exists("kmeans_riesgo_actuarial.pkl")
+        else "kmeans_riesgo_actuarial.pkl"
     )
 
     meta = (
